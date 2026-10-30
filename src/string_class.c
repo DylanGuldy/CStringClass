@@ -131,81 +131,6 @@ bool ends_with_using_basic_text(const string *self, const char *text_in_question
 bool is_upper(const string *self) {}
 bool is_lower(const string *self) {}
 
-static const _string_vtable default_string_vtable = {
-
-    .clear = clear,
-
-    /*
-      Get and Set
-    */
-    .get_length = get_length,
-    .get_c_string = get_c_string,
-    .set_string = set_string,
-    .set_string_using_basic_text = set_string_using_basic_text,
-    .get_substring_from_index_a_to_index_b = get_substring_from_index_a_to_index_b,
-    /*
-      Manipulate / modify
-    */
-    .to_upper = to_upper,
-    .to_lower = to_lower,
-    .reverse = reverse,
-    .replace_first = replace_first,
-    .replace_first_using_basic_text = replace_first_using_basic_text,
-    .replace = replace,
-    .replace_using_basic_text = replace_using_basic_text,
-    /*
-      Grow / add
-    */
-    .append = append,
-    .append_using_basic_text = append_using_basic_text,
-    .join = join,
-    .join_using_basic_text = join_using_basic_text,
-    .pad_left = pad_left,
-    .pad_right = pad_right,
-    /*
-      Insert
-    */
-    .insert = insert,
-    .insert_using_basic_text = insert_using_basic_text,
-    /*
-      Remove / shrink
-    */
-    .delete_from_index_a_to_index_b = delete_from_index_a_to_index_b,
-    .delete_first_instace = delete_first_instace,
-    .delete_first_instance_using_basic_text = delete_first_instance_using_basic_text,
-    .delete_all_instaces = delete_all_instaces,
-    .delete_all_instance_using_basic_text = delete_all_instance_using_basic_text,
-    .trim_from_end = trim_from_end,
-    .trim_from_start = trim_from_start,
-    /*
-      Find
-    */
-    .find_substring = find_substring,
-    .find_substring_using_basic_text = find_substring_using_basic_text,
-    .find_first_char = find_first_char,
-    .find_last_char = find_last_char,
-    /*
-      Split
-    */
-    .split = split,
-    .split_using_basic_text = split_using_basic_text,
-    /*
-      Compare
-    */
-    .is_equal = is_equal,
-    .is_null_or_whitespace = is_null_or_whitespace,
-    .is_alpha = is_alpha,
-    .is_numeric = is_numeric,
-    .is_alphanumeric = is_alphanumeric,
-    .contains = contains,
-    .contains_using_basic_text = contains_using_basic_text,
-    .starts_with = starts_with,
-    .starts_with_using_basic_text = starts_with_using_basic_text,
-    .ends_with = ends_with,
-    .ends_with_using_basic_text = ends_with_using_basic_text,
-    .is_upper = is_upper,
-    .is_lower = is_lower};
-
 /*
   Requred functions
 */
@@ -237,8 +162,6 @@ void initialize_string_pointer(string *new, const char *starting_text)
         printf("Failed to get memory for c string\n.");
       }
     }
-    new->data.length = starting_text_size;
-    new->functions = &default_string_vtable;
   }
   else
   {
@@ -248,7 +171,9 @@ void initialize_string_pointer(string *new, const char *starting_text)
     if (NULL == new)
     {
       printf("Failed to get memory");
+      return;
     }
+    initialize_string_pointer(new, starting_text);
   }
 }
 
@@ -295,9 +220,4 @@ void destroy_array(string_array **array)
       }
     }
   }
-}
-
-const _string_vtable *get_vtable()
-{
-  return &default_string_vtable;
 }

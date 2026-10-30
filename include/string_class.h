@@ -10,13 +10,11 @@
 
 struct string;
 struct _string_data;
-struct _string_vtable;
 
 struct string_array;
 
 typedef struct string string;
 typedef struct _string_data _string_data;
-typedef struct _string_vtable _string_vtable;
 typedef struct string_array string_array;
 
 // For best practice, use MACROS for RAII
@@ -27,8 +25,8 @@ typedef struct string_array string_array;
 #define _auto_cleanup_string_ptr_ __attribute__((__cleanup__(destroy_ptr)))
 #define _auto_cleanup_string_array_ __attribute__((__cleanup__(destroy_array)))
 
-// ONLY if you are okay with manually hooking up the vtable and/or
-// on returns from functions. For inital creation use the MACROS
+// ONLY if you are okay with manually creating your string.
+// For inital creation it's suggested to use the MACROS
 // defined below
 // NOTE: string_array construction is still manual
 #define auto_string _auto_cleanup_string_ string
@@ -45,12 +43,6 @@ void initialize_string_pointer(string *new, const char *starting_text);
 void destroy(string *self);
 void destroy_ptr(string **self);
 void destroy_array(string_array **array);
-
-/*
-  Vtable, defines methods string class will have
-  should hook up to a static instance of _string_vtable
-*/
-const _string_vtable *get_vtable();
 
 /*
   Helper, can ignore
@@ -70,15 +62,13 @@ const _string_vtable *get_vtable();
       {                                        \
           .data = {                            \
               .c_string = NULL,                \
-              .length = 0},                    \
-          .functions = get_vtable()};
+              .length = 0}};
 
 #define NEW_STRING(string_variable_name, inital_value)                                \
   NEW_EMPTY_STRING(string_variable_name)                                              \
   string_variable_name.data = {                                                       \
       .c_string = malloc(_GET_LENGTH_OF_BASIC_STRING(initial_value) + 1),             \
       .length = _GET_LENGTH_OF_BASIC_STRING(initial_value)};                          \
-  .functions = get_vtable();                                                          \
   if (NULL == string_variable_name.data.c_string)                                     \
   {                                                                                   \
     printf("Failed to get memory for c string\n");                                    \
@@ -108,92 +98,89 @@ const _string_vtable *get_vtable();
   and an interger, that's not a lot of data
 */
 
-struct _string_vtable
-{
-  /*
-    Create and Destroy
-  */
-  void (*clear)(string *self);
+/*
+  Create and Destroy
+*/
+void clear(string *self);
 
-  /*
-    Get and Set
-  */
-  size_t (*get_length)(string *self);
-  const char *(*get_c_string)(const string *self);
-  void (*set_string)(string *self, string *string);
-  void (*set_string_using_basic_text)(string *self, const char *new_text);
-  string *(*get_substring_from_index_a_to_index_b)(const string *self, int start_index_a, int end_index_b);
+/*
+  Get and Set
+*/
+size_t get_length(string *self);
+const char *get_c_string(const string *self);
+void set_string(string *self, string *string);
+void set_string_using_basic_text(string *self, const char *new_text);
+string *get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b);
 
-  /*
-    Manipulate / modify
-  */
-  void (*to_upper)(string *self);
-  void (*to_lower)(string *self);
-  void (*reverse)(string *self);
-  void (*replace_first)(string *self, const string replacement, bool *replacment_found);
-  void (*replace_first_using_basic_text)(string *self, const char *replacment, bool *replacment_found);
-  void (*replace)(string *self, const string replacement, int *number_replaced);
-  void (*replace_using_basic_text)(string *self, const char *replacment, int *number_replaced);
+/*
+  Manipulate / modify
+*/
+void to_upper(string *self);
+void to_lower(string *self);
+void reverse(string *self);
+void replace_first(string *self, const string replacement, bool *replacment_found);
+void replace_first_using_basic_text(string *self, const char *replacment, bool *replacment_found);
+void replace(string *self, const string replacement, int *number_replaced);
+void replace_using_basic_text(string *self, const char *replacment, int *number_replaced);
 
-  /*
-    Grow / add
-  */
-  void (*append)(string *self, const string more_string);
-  void (*append_using_basic_text)(string *self, const char *using_basic_text);
-  void (*join)(string *self, string *strings, const string sparation_characters);
-  void (*join_using_basic_text)(string *self, string *strings, const char *sparation_characters);
-  void (*pad_left)(string *self, char character, size_t count);
-  void (*pad_right)(string *self, char character, size_t count);
+/*
+  Grow / add
+*/
+void append(string *self, const string more_string);
+void append_using_basic_text(string *self, const char *using_basic_text);
+void join(string *self, string *strings, const string sparation_characters);
+void join_using_basic_text(string *self, string *strings, const char *sparation_characters);
+void pad_left(string *self, char character, size_t count);
+void pad_right(string *self, char character, size_t count);
 
-  /*
-    Insert
-  */
-  void (*insert)(string *self, string string, int index_of_insertion);
-  void (*insert_using_basic_text)(string *self, const char *using_basic_text, int index_of_insertion);
+/*
+  Insert
+*/
+void insert(string *self, string string, int index_of_insertion);
+void insert_using_basic_text(string *self, const char *using_basic_text, int index_of_insertion);
 
-  /*
-    Remove / shrink
-  */
-  void (*delete_from_index_a_to_index_b)(string *self, int start_index_a, int end_index_b);
-  void (*delete_first_instace)(string *self, const string text_to_remove);
-  void (*delete_first_instance_using_basic_text)(string *self, const char *text_to_remove);
-  void (*delete_all_instaces)(string *self, const string text_to_remove);
-  void (*delete_all_instance_using_basic_text)(string *self, const char *text_to_remove);
-  void (*trim_from_end)(string *self, char character_to_remove);
-  void (*trim_from_start)(string *self, char character_to_remove);
+/*
+  Remove / shrink
+*/
+void delete_from_index_a_to_index_b(string *self, int start_index_a, int end_index_b);
+void delete_first_instace(string *self, const string text_to_remove);
+void delete_first_instance_using_basic_text(string *self, const char *text_to_remove);
+void delete_all_instaces(string *self, const string text_to_remove);
+void delete_all_instance_using_basic_text(string *self, const char *text_to_remove);
+void trim_from_end(string *self, char character_to_remove);
+void trim_from_start(string *self, char character_to_remove);
 
-  /*
-    Find
-  */
-  int (*find_substring)(const string *self, const string sub_string);
-  int (*find_substring_using_basic_text)(const string *self, const char *using_basic_text);
-  int (*find_first_char)(const string *self, char c);
-  int (*find_last_char)(const string *self, char c);
+/*
+  Find
+*/
+int find_substring(const string *self, const string sub_string);
+int find_substring_using_basic_text(const string *self, const char *using_basic_text);
+int find_first_char(const string *self, char c);
+int find_last_char(const string *self, char c);
 
-  /*
-    Split
-  */
-  // Returns array of strings
-  string_array *(*split)(const string *self, const string split, int *number_of_result_strings);
-  string_array *(*split_using_basic_text)(const string *self, const char *using_basic_textint, int *number_of_result_strings);
+/*
+  Split
+*/
+// Returns array of strings
+string_array *split(const string *self, const string split, int *number_of_result_strings);
+string_array *split_using_basic_text(const string *self, const char *using_basic_textint, int *number_of_result_strings);
 
-  /*
-    Compare
-  */
-  bool (*is_equal)(const string *self, const string other);
-  bool (*is_null_or_whitespace)(const string *self);
-  bool (*is_alpha)(const string *self);
-  bool (*is_numeric)(const string *self);
-  bool (*is_alphanumeric)(const string *self);
-  bool (*contains)(const string *self, const string text_in_question);
-  bool (*contains_using_basic_text)(const string *self, const char *text_in_question);
-  bool (*starts_with)(const string *self, const string text_in_question);
-  bool (*starts_with_using_basic_text)(const string *self, const char *text_in_question);
-  bool (*ends_with)(const string *self, const string text_in_question);
-  bool (*ends_with_using_basic_text)(const string *self, const char *text_in_question);
-  bool (*is_upper)(const string *self);
-  bool (*is_lower)(const string *self);
-};
+/*
+  Compare
+*/
+bool is_equal(const string *self, const string other);
+bool is_null_or_whitespace(const string *self);
+bool is_alpha(const string *self);
+bool is_numeric(const string *self);
+bool is_alphanumeric(const string *self);
+bool contains(const string *self, const string text_in_question);
+bool contains_using_basic_text(const string *self, const char *text_in_question);
+bool starts_with(const string *self, const string text_in_question);
+bool starts_with_using_basic_text(const string *self, const char *text_in_question);
+bool ends_with(const string *self, const string text_in_question);
+bool ends_with_using_basic_text(const string *self, const char *text_in_question);
+bool is_upper(const string *self);
+bool is_lower(const string *self);
 
 struct _string_data
 {
@@ -204,7 +191,6 @@ struct _string_data
 struct string
 {
   _string_data data;
-  const _string_vtable *functions;
 };
 
 struct string_array
