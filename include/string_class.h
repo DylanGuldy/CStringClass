@@ -12,14 +12,31 @@ struct string;
 struct _string_data;
 struct _string_vtable;
 
+struct string_array;
+
 typedef struct string string;
 typedef struct _string_data _string_data;
 typedef struct _string_vtable _string_vtable;
+typedef struct string_array string_array;
 
 // For best practice, use MACROS for RAII
 
+// Define auto clean up macros, users CAN use this but using the
+// constructor macros or the below would be easier / more intuitive,
+#define _auto_cleanup_string_ __attribute__((__cleanup__(destroy)))
+#define _auto_cleanup_string_ptr_ __attribute__((__cleanup__(destroy_ptr)))
+#define _auto_cleanup_string_array_ __attribute__((__cleanup__(destroy_array)))
+
+// ONLY if you are okay with manually hooking up the vtable and/or
+// on returns from functions. For inital creation use the MACROS
+// defined below
+// NOTE: string_array construction is still manual
+#define auto_string _auto_cleanup_string_ string
+#define auto_string_ptr _auto_cleanup_string_ptr_ string *
+#define auto_string_array _auto_cleanup_string_ptr_ string_array *
+
 /*
-  Must be implemented
+  Must be implemented for auto clean up to work, if you don't this will break
 */
 /*
   Deconstructors
@@ -27,58 +44,54 @@ typedef struct _string_vtable _string_vtable;
 void initialize_string_pointer(string *new, const char *starting_text);
 void destroy(string *self);
 void destroy_ptr(string **self);
+void destroy_array(string_array **array);
+
 /*
-  Vtable
+  Vtable, defines methods string class will have
+  should hook up to a static instance of _string_vtable
 */
 const _string_vtable *get_vtable();
 
 /*
-  Constructors
+  Helper, can ignore
 */
 #define _GET_LENGTH_OF_BASIC_STRING(const_char_string) \
-  const char *s = const_char_string;                   \
-  while (*s != '\0')                                   \
+  while (const char *s != '\0')                        \
   {                                                    \
     s++;                                               \
   }                                                    \
-  size_t _basic_length_ = (s - basic_string);
+  (s - basic_string)
 
-/**
- * NOTE: Must have a destroy function that takes string *var as an arg
- */
-#define NEW_EMPTY_STRING(string_variable_name)                        \
-  string string_variable_name __attribute__((__cleanup__(destroy))) = \
-      {                                                               \
-          .data = {                                                   \
-              .c_string = NULL,                                       \
-              .length = 0},                                           \
+/*
+  Constructors
+*/
+#define NEW_EMPTY_STRING(string_variable_name) \
+  auto_string string_variable_name =           \
+      {                                        \
+          .data = {                            \
+              .c_string = NULL,                \
+              .length = 0},                    \
           .functions = get_vtable()};
 
-#define NEW_STRING(string_variable_name, inital_value)    \
-  NEW_EMPTY_STRING(string_variable_name)                  \
-  _GET_LENGTH_OF_BASIC_STRING(initial_value)              \
-  string_variable_name.data = {                           \
-      .c_string = malloc(_basic_length_ + 1),             \
-      .length = _basic_length_};                          \
-  .functions = get_vtable();                              \
-  if (NULL == string_variable_name.data.c_string)         \
-  {                                                       \
-    printf("Failed to get memory for c string\n");        \
-  }                                                       \
-  memset(new_string.data.c_string, 0x00, _basic_length_); \
-  memcpy(new_string.data.c_string, initial_text, _basic_length_);
+#define NEW_STRING(string_variable_name, inital_value)                                \
+  NEW_EMPTY_STRING(string_variable_name)                                              \
+  string_variable_name.data = {                                                       \
+      .c_string = malloc(_GET_LENGTH_OF_BASIC_STRING(initial_value) + 1),             \
+      .length = _GET_LENGTH_OF_BASIC_STRING(initial_value)};                          \
+  .functions = get_vtable();                                                          \
+  if (NULL == string_variable_name.data.c_string)                                     \
+  {                                                                                   \
+    printf("Failed to get memory for c string\n");                                    \
+  }                                                                                   \
+  memset(new_string.data.c_string, 0x00, _GET_LENGTH_OF_BASIC_STRING(initial_value)); \
+  memcpy(new_string.data.c_string, initial_text, _GET_LENGTH_OF_BASIC_STRING(initial_value));
 
 #define CLONE_STRING(new_string_variable_name, pointer_to_other_string) \
   NEW_STRING(new_string_variable_name, pointer_to_other_string->data.c_string)
 
-#define NEW_STRING_PTR(string_variable_name)                                                       \
-  string *string_variable_name __attribute__((__cleanup__(destroy_ptr))) = malloc(sizeof(string)); \
+#define NEW_STRING_PTR(string_variable_name)                     \
+  auto_string_ptr string_variable_name = malloc(sizeof(string)); \
   initialize_string_pointer(string_variable_name);
-
-/*
-  Next move, string creation (hooking up vtable to be
-  static for default definition, don't foget), RAII
-*/
 
 /*
   NOTE: I could have used generics, but they are too
@@ -109,7 +122,7 @@ struct _string_vtable
   const char *(*get_c_string)(const string *self);
   void (*set_string)(string *self, string *string);
   void (*set_string_using_basic_text)(string *self, const char *new_text);
-  string (*get_substring_from_index_a_to_index_b)(const string *self, int start_index_a, int end_index_b);
+  string *(*get_substring_from_index_a_to_index_b)(const string *self, int start_index_a, int end_index_b);
 
   /*
     Manipulate / modify
@@ -161,8 +174,8 @@ struct _string_vtable
     Split
   */
   // Returns array of strings
-  string *(*split)(const string *self, const string split, int *number_of_result_strings);
-  string *(*split_using_basic_text)(const string *self, const char *using_basic_textint, int *number_of_result_strings);
+  string_array *(*split)(const string *self, const string split, int *number_of_result_strings);
+  string_array *(*split_using_basic_text)(const string *self, const char *using_basic_textint, int *number_of_result_strings);
 
   /*
     Compare
@@ -192,4 +205,10 @@ struct string
 {
   _string_data data;
   const _string_vtable *functions;
+};
+
+struct string_array
+{
+  string *string_array;
+  size_t number_of_strings;
 };

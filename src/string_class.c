@@ -60,7 +60,7 @@ void set_string_using_basic_text(string *self, const char *new_text)
     printf("New string is: %s\n", self->data.c_string);
   }
 }
-string get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b) {}
+string *get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b) {}
 
 /*
   Manipulate / modify
@@ -112,8 +112,8 @@ int find_last_char(const string *self, char c) {}
   Split
 */
 // Returns array of strings
-string *split(const string *self, const string split, int *number_of_result_strings) {}
-string *split_using_basic_text(const string *self, const char *using_basic_textint, int *number_of_result_strings) {}
+string_array *split(const string *self, const string split, int *number_of_result_strings) {}
+string_array *split_using_basic_text(const string *self, const char *using_basic_textint, int *number_of_result_strings) {}
 /*
   Compare
 */
@@ -279,6 +279,21 @@ void destroy_ptr(string **self)
     }
     (*self)->data.length = 0;
     free(self);
+  }
+}
+
+void destroy_array(string_array **array)
+{
+  if (array && *array)
+  {
+    for (int ix = 0; ix < (*array)->number_of_strings; ix++)
+    {
+      string *string = &(*array)->string_array[ix];
+      if (string)
+      {
+        destroy_ptr(&string);
+      }
+    }
   }
 }
 
