@@ -9,5 +9,14 @@ int main()
   NEW_EMPTY_STRING(fill_out_later);
   set_string_using_basic_text(&fill_out_later, "New Value");
   printf("%s\n", get_c_string(&fill_out_later));
+
+  // Test split
+  int number_of_new_strings;
+  // auto_string_array split_string = split_using_basic_text(&fill_out_later, " ", &number_of_new_strings);
+  // for (int ix = 0; ix < number_of_new_strings; ix++)
+  //{
+  //   printf(split_string->string_array[ix].data.c_string);
+  // }
+
   return 0;
 }

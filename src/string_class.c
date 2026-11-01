@@ -112,8 +112,32 @@ int find_last_char(const string *self, char c) {}
   Split
 */
 // Returns array of strings
-string_array *split(const string *self, const string split, int *number_of_result_strings) {}
-string_array *split_using_basic_text(const string *self, const char *using_basic_textint, int *number_of_result_strings) {}
+string_array *split(const string *self, const string split) {}
+string_array *split_using_basic_text(const string *self, const char *splitter_text)
+{
+  // const char *string_to_split = *self->data.c_string;
+  // // Sliding window
+  // char *main_string_tracker = string_to_split;
+  // char *splitter_tracker = splitter_text;
+
+  // size_t splitter_size = _get_length_of_basic_string(splitter_text);
+
+  // // We could also stop once the length of the remaining characters is less than
+  // // the split text but I think the cycles to calculate that and time saved is
+  // // not any greather than just itterating through
+  // for (*main_string_tracker; *main_string_tracker != '\0'; main_string_tracker++)
+  // {
+  //   size_t same_character_count = 0;
+  //   while (*main_string_tracker == *splitter_tracker)
+  //   {
+  //     same_character_count++;
+  //     if (same_character_count == splitter_size)
+  //     {
+  //     }
+  //   }
+  // }
+}
+
 /*
   Compare
 */

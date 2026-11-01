@@ -31,7 +31,7 @@ typedef struct string_array string_array;
 // NOTE: string_array construction is still manual
 #define auto_string _auto_cleanup_string_ string
 #define auto_string_ptr _auto_cleanup_string_ptr_ string *
-#define auto_string_array _auto_cleanup_string_ptr_ string_array *
+#define auto_string_array _auto_cleanup_string_array_ string_array *
 
 /*
   Must be implemented for auto clean up to work, if you don't this will break
@@ -162,8 +162,8 @@ int find_last_char(const string *self, char c);
   Split
 */
 // Returns array of strings
-string_array *split(const string *self, const string split, int *number_of_result_strings);
-string_array *split_using_basic_text(const string *self, const char *using_basic_textint, int *number_of_result_strings);
+string_array *split(const string *self, const string splitter);
+string_array *split_using_basic_text(const string *self, const char *splitter_text);
 
 /*
   Compare
