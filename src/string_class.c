@@ -25,7 +25,7 @@ void clear(string *self) {}
 size_t str_get_length(string *self) {}
 const char *str_get_c_string(const string *self)
 {
-  return self->data.c_string;
+  return self->c_string;
 }
 void str_set_string(string *self, string *string) {}
 void str_set_string_using_basic_text(string *self, const char *new_text)
@@ -33,13 +33,13 @@ void str_set_string_using_basic_text(string *self, const char *new_text)
   if (self)
   {
     size_t length = _get_length_of_basic_string(new_text);
-    if (length > self->data.length)
+    if (length > self->length)
     {
-      if (self->data.c_string)
+      if (self->c_string)
       {
         printf("Resizing\n");
-        self->data.c_string = realloc(self->data.c_string, length + 1);
-        if (NULL == self->data.c_string)
+        self->c_string = realloc(self->c_string, length + 1);
+        if (NULL == self->c_string)
         {
           printf("Failed to get realloc of c string\n");
         }
@@ -47,17 +47,17 @@ void str_set_string_using_basic_text(string *self, const char *new_text)
       else
       {
         printf("Creating new string\n");
-        self->data.c_string = malloc(length + 1);
-        if (NULL == self->data.c_string)
+        self->c_string = malloc(length + 1);
+        if (NULL == self->c_string)
         {
           printf("Failed to malloc for c string\n");
         }
       }
     }
-    memcpy((void *)self->data.c_string, (void *)new_text, length + 1);
-    self->data.length = length;
+    memcpy((void *)self->c_string, (void *)new_text, length + 1);
+    self->length = length;
 
-    printf("New string is: %s\n", self->data.c_string);
+    printf("New string is: %s\n", self->c_string);
   }
 }
 string *str_get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b) {}
@@ -68,34 +68,34 @@ string *str_get_substring_from_index_a_to_index_b(const string *self, int start_
 void str_to_upper(string *self) {}
 void str_to_lower(string *self) {}
 void str_reverse(string *self) {}
-void str_replace_first(string *self, const string replacement, bool *replacement_found) {}
+void str_replace_first(string *self, const string *replacement, bool *replacement_found) {}
 void str_replace_first_using_basic_text(string *self, const char *replacement, bool *replacement_found) {}
-void str_replace(string *self, const string replacement, int *number_replaced) {}
+void str_replace(string *self, const string *replacement, int *number_replaced) {}
 void str_replace_using_basic_text(string *self, const char *replacement, int *number_replaced) {}
 
 /*
   Grow / add
 */
-void str_append(string *self, const string more_string) {}
+void str_append(string *self, const string *more_string) {}
 void str_append_using_basic_text(string *self, const char *using_basic_text) {}
-void str_join(string *self, string strings[], const string separation_characters) {}
-void str_join_using_basic_text(string *self, string strings[], const char *separation_characters) {}
+void str_join(string *self, const string_array *strings, const string *separation_characters) {}
+void str_join_using_basic_text(string *self, const string_array *strings, const char *separation_characters) {}
 void str_pad_left(string *self, char character, size_t count) {}
 void str_pad_right(string *self, char character, size_t count) {}
 
 /*
   Insert
 */
-void str_insert(string *self, string string, int index_of_insertion) {}
+void str_insert(string *self, const string *string, int index_of_insertion) {}
 void str_insert_using_basic_text(string *self, const char *using_basic_text, int index_of_insertion) {}
 
 /*
   Remove / shrink
 */
 void str_delete_from_index_a_to_index_b(string *self, int start_index_a, int end_index_b) {}
-void str_delete_first_instance(string *self, const string text_to_remove) {}
+void str_delete_first_instance(string *self, const string *text_to_remove) {}
 void str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove) {}
-void str_delete_all_instances(string *self, const string text_to_remove) {}
+void str_delete_all_instances(string *self, const string *text_to_remove) {}
 void str_delete_all_instance_using_basic_text(string *self, const char *text_to_remove) {}
 void str_trim_from_end(string *self, char character_to_remove) {}
 void str_trim_from_start(string *self, char character_to_remove) {}
@@ -103,7 +103,7 @@ void str_trim_from_start(string *self, char character_to_remove) {}
 /*
   Find
 */
-int str_find_substring(const string *self, const string sub_string) {}
+int str_find_substring(const string *self, const string *sub_string) {}
 int str_find_substring_using_basic_text(const string *self, const char *using_basic_text) {}
 int str_find_first_char(const string *self, char c) {}
 int str_find_last_char(const string *self, char c) {}
@@ -112,10 +112,10 @@ int str_find_last_char(const string *self, char c) {}
   Split
 */
 // Returns array of strings
-string_array *str_split(const string *self, const string str_split) {}
+string_array *str_split(const string *self, const string *str_split) {}
 string_array *str_split_using_basic_text(const string *self, const char *splitter_text)
 {
-  // const char *string_to_split = *self->data.c_string;
+  // const char *string_to_split = *self->c_string;
   // // Sliding window
   // char *main_string_tracker = string_to_split;
   // char *splitter_tracker = splitter_text;
@@ -141,16 +141,16 @@ string_array *str_split_using_basic_text(const string *self, const char *splitte
 /*
   Compare
 */
-bool str_is_equal(const string *self, const string other) {}
+bool str_is_equal(const string *self, const string *other) {}
 bool str_is_null_or_whitespace(const string *self) {}
 bool str_is_alpha(const string *self) {}
 bool str_is_numeric(const string *self) {}
 bool str_is_alphanumeric(const string *self) {}
-bool str_contains(const string *self, const string text_in_question) {}
+bool str_contains(const string *self, const string *text_in_question) {}
 bool str_contains_using_basic_text(const string *self, const char *text_in_question) {}
-bool str_starts_with(const string *self, const string text_in_question) {}
+bool str_starts_with(const string *self, const string *text_in_question) {}
 bool str_starts_with_using_basic_text(const string *self, const char *text_in_question) {}
-bool str_ends_with(const string *self, const string text_in_question) {}
+bool str_ends_with(const string *self, const string *text_in_question) {}
 bool str_ends_with_using_basic_text(const string *self, const char *text_in_question) {}
 bool str_is_upper(const string *self) {}
 bool str_is_lower(const string *self) {}
@@ -166,22 +166,22 @@ void initialize_string_pointer(string *new, const char *starting_text)
   // maybe we reuse
   if (new)
   {
-    size_t current_pointer_string_size = _get_length_of_basic_string(new->data.c_string);
+    size_t current_pointer_string_size = _get_length_of_basic_string(new->c_string);
 
     // if for some reason the supposed new ptr has a valid ptr
-    if (new->data.c_string &&
+    if (new->c_string &&
         starting_text_size > current_pointer_string_size)
     {
-      new->data.c_string = realloc(new->data.c_string, starting_text_size + 1);
-      if (NULL == new->data.c_string)
+      new->c_string = realloc(new->c_string, starting_text_size + 1);
+      if (NULL == new->c_string)
       {
         printf("Failed to get reallocation for c string\n");
       }
     }
-    if (NULL == new->data.c_string)
+    if (NULL == new->c_string)
     {
-      new->data.c_string = malloc(starting_text_size + 1);
-      if (NULL == new->data.c_string)
+      new->c_string = malloc(starting_text_size + 1);
+      if (NULL == new->c_string)
       {
         printf("Failed to get memory for c string\n.");
       }
@@ -209,11 +209,11 @@ void str_destroy(string *self)
   printf("I'm killing!\n");
   if (self)
   {
-    if (NULL != (self)->data.c_string)
+    if (NULL != (self)->c_string)
     {
-      free((self)->data.c_string);
+      free((self)->c_string);
     }
-    (self)->data.length = 0;
+    (self)->length = 0;
   }
 }
 
@@ -222,11 +222,11 @@ void str_destroy_ptr(string **self)
   printf("DEBUG: I'M KILLING AGAIN.\n");
   if (self && *self)
   {
-    if (NULL != (*self)->data.c_string)
+    if (NULL != (*self)->c_string)
     {
-      free((*self)->data.c_string);
+      free((*self)->c_string);
     }
-    (*self)->data.length = 0;
+    (*self)->length = 0;
     free(self);
   }
 }

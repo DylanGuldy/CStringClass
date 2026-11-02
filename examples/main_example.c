@@ -4,8 +4,8 @@
 int main()
 {
   NEW_EMPTY_STRING(basic);
-  printf("basic: %s\n", basic.data.c_string);
-  printf("basic length: %d\n", (int)basic.data.length);
+  printf("basic: %s\n", basic.c_string);
+  printf("basic length: %d\n", (int)basic.length);
   NEW_EMPTY_STRING(fill_out_later);
   str_set_string_using_basic_text(&fill_out_later, "New Value");
   printf("%s\n", str_get_c_string(&fill_out_later));
