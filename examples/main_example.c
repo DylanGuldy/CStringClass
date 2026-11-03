@@ -10,6 +10,8 @@ int main()
   str_set_string_using_basic_text(&fill_out_later, "New Value");
   printf("%s\n", str_get_c_string(&fill_out_later));
 
+  NEW_STRING(test_new, "Hello world");
+  printf("%s\n", str_get_c_string(&test_new));
   // Test str_split
   int number_of_new_strings;
   // auto_string_array split_string = str_split_using_basic_text(&fill_out_later, " ", &number_of_new_strings);

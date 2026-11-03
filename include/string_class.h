@@ -2,7 +2,8 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-
+#include <stdlib.h>
+#include <memory.h>
 // remove this later
 #include "stdio.h"
 
@@ -19,17 +20,17 @@ typedef struct string_array string_array;
 
 // Define auto clean up macros, users CAN use this but using the
 // constructor macros or the below would be easier / more intuitive,
-#define _auto_cleanup_string_ __attribute__((__cleanup__(str_destroy)))
-#define _auto_cleanup_string_ptr_ __attribute__((__cleanup__(str_destroy_ptr)))
-#define _auto_cleanup_string_array_ __attribute__((__cleanup__(str_destroy_array)))
+#define priv_auto_cleanup_string_ __attribute__((__cleanup__(str_destroy)))
+#define priv_auto_cleanup_string_ptr_ __attribute__((__cleanup__(str_destroy_ptr)))
+#define priv_auto_cleanup_string_array_ __attribute__((__cleanup__(str_destroy_array)))
 
 // ONLY if you are okay with manually creating your string.
 // For inital creation it's suggested to use the MACROS
 // defined below
 // NOTE: string_array construction is still manual
-#define auto_string _auto_cleanup_string_ string
-#define auto_string_ptr _auto_cleanup_string_ptr_ string *
-#define auto_string_array _auto_cleanup_string_array_ string_array *
+#define auto_string priv_auto_cleanup_string_ string
+#define auto_string_ptr priv_auto_cleanup_string_ptr_ string *
+#define auto_string_array priv_auto_cleanup_string_array_ string_array *
 
 /*
   Must be implemented for auto clean up to work, if you don't this will break
@@ -45,12 +46,14 @@ void str_destroy_array(string_array **array);
 /*
   Helper, can ignore
 */
-#define _GET_LENGTH_OF_BASIC_STRING(const_char_string) \
-  while (const char *s != '\0')                        \
-  {                                                    \
-    s++;                                               \
-  }                                                    \
-  (s - basic_string)
+#define PRIV_GET_LENGTH_OF_BASIC_STRING(const_char_string) \
+  ({                                                       \
+  char *s = const_char_string;                             \
+  while (*s != '\0')                                       \
+  {                                                        \
+    s++;                                                   \
+  }                                                        \
+  (s - const_char_string); })
 
 /*
   Constructors
@@ -61,24 +64,28 @@ void str_destroy_array(string_array **array);
           .c_string = NULL,                    \
           .length = 0};
 
-#define NEW_STRING(string_variable_name, inital_value)                           \
-  NEW_EMPTY_STRING(string_variable_name)                                         \
-  string_variable_name = {                                                       \
-      .c_string = malloc(_GET_LENGTH_OF_BASIC_STRING(initial_value) + 1),        \
-      .length = _GET_LENGTH_OF_BASIC_STRING(initial_value)};                     \
-  if (NULL == string_variable_name.c_string)                                     \
-  {                                                                              \
-    printf("Failed to get memory for c string\n");                               \
-  }                                                                              \
-  memset(new_string.c_string, 0x00, _GET_LENGTH_OF_BASIC_STRING(initial_value)); \
-  memcpy(new_string.c_string, initial_text, _GET_LENGTH_OF_BASIC_STRING(initial_value));
+#define NEW_STRING(string_variable_name, initial_value)                                                     \
+  NEW_EMPTY_STRING(string_variable_name)                                                                    \
+  {                                                                                                         \
+    string_variable_name.length = PRIV_GET_LENGTH_OF_BASIC_STRING(initial_value);                           \
+    string_variable_name.c_string = malloc(string_variable_name.length + 1);                                \
+    if (string_variable_name.c_string)                                                                      \
+    {                                                                                                       \
+      memset(string_variable_name.c_string, 0x00, PRIV_GET_LENGTH_OF_BASIC_STRING(initial_value));          \
+      memcpy(string_variable_name.c_string, initial_value, PRIV_GET_LENGTH_OF_BASIC_STRING(initial_value)); \
+    }                                                                                                       \
+    else                                                                                                    \
+    {                                                                                                       \
+      string_variable_name.length = 0;                                                                      \
+    }                                                                                                       \
+  }
 
 #define CLONE_STRING(new_string_variable_name, pointer_to_other_string) \
-  NEW_STRING(new_string_variable_name, pointer_to_other_string->c_string)
+  NEW_STRING(new_string_variable_name, (pointer_to_other_string->c_string))
 
 #define NEW_STRING_PTR(string_variable_name)                     \
   auto_string_ptr string_variable_name = malloc(sizeof(string)); \
-  initialize_string_pointer(string_variable_name);
+  initialize_string_pointer(string_variable_name, "");
 
 /*
   NOTE: I could have used generics, but they are too
@@ -98,7 +105,7 @@ void clear(string *self);
 /*
   Get and Set
 */
-size_t str_get_length(string *self);
+size_t str_get_length(const string *self);
 const char *str_get_c_string(const string *self);
 void str_set_string(string *self, string *string);
 void str_set_string_using_basic_text(string *self, const char *new_text);
@@ -110,10 +117,10 @@ string *str_get_substring_from_index_a_to_index_b(const string *self, int start_
 void str_to_upper(string *self);
 void str_to_lower(string *self);
 void str_reverse(string *self);
-void str_replace_first(string *self, const string *replacement, bool *replacement_fount);
-void str_replace_first_using_basic_text(string *self, const char *replacement, bool *replacement_fount);
-void str_replace(string *self, const string *replacement, int *number_replaced);
-void str_replace_using_basic_text(string *self, const char *replacement, int *number_replaced);
+void str_replace_first(string *self, const string *find, const string *replacement, bool *replacement_found);
+void str_replace_first_using_basic_text(string *self, const char *find, const char *replacement, bool *replacement_fount);
+void str_replace(string *self, const string *find, const string *replacement, int *number_replaced);
+void str_replace_using_basic_text(string *self, const char *find, const char *replacement, int *number_replaced);
 
 /*
   Grow / add
@@ -128,8 +135,8 @@ void str_pad_right(string *self, char character, size_t count);
 /*
   Insert
 */
-void str_insert(string *self, const string *string, int index_of_insertion);
-void str_insert_using_basic_text(string *self, const char *using_basic_text, int index_of_insertion);
+void str_insert(string *self, const string *insertion, int index_of_insertion);
+void str_insert_using_basic_text(string *self, const char *insertion, int index_of_insertion);
 
 /*
   Remove / shrink
@@ -138,7 +145,7 @@ void str_delete_from_index_a_to_index_b(string *self, int start_index_a, int end
 void str_delete_first_instance(string *self, const string *text_to_remove);
 void str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove);
 void str_delete_all_instances(string *self, const string *text_to_remove);
-void str_delete_all_instance_using_basic_text(string *self, const char *text_to_remove);
+void str_delete_all_instances_using_basic_text(string *self, const char *text_to_remove);
 void str_trim_from_end(string *self, char character_to_remove);
 void str_trim_from_start(string *self, char character_to_remove);
 

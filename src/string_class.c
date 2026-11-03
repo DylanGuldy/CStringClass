@@ -1,6 +1,5 @@
 #include "string_class.h"
-#include <stdlib.h>
-#include <memory.h>
+
 /*
   Private helpers
 */
@@ -22,12 +21,14 @@ void clear(string *self) {}
 /*
   Get and Set
 */
-size_t str_get_length(string *self) {}
+size_t str_get_length(const string *self) {}
 const char *str_get_c_string(const string *self)
 {
   return self->c_string;
 }
+
 void str_set_string(string *self, string *string) {}
+
 void str_set_string_using_basic_text(string *self, const char *new_text)
 {
   if (self)
@@ -68,10 +69,10 @@ string *str_get_substring_from_index_a_to_index_b(const string *self, int start_
 void str_to_upper(string *self) {}
 void str_to_lower(string *self) {}
 void str_reverse(string *self) {}
-void str_replace_first(string *self, const string *replacement, bool *replacement_found) {}
-void str_replace_first_using_basic_text(string *self, const char *replacement, bool *replacement_found) {}
-void str_replace(string *self, const string *replacement, int *number_replaced) {}
-void str_replace_using_basic_text(string *self, const char *replacement, int *number_replaced) {}
+void str_replace_first(string *self, const string *find, const string *replacement, bool *replacement_found) {}
+void str_replace_first_using_basic_text(string *self, const char *find, const char *replacement, bool *replacement_found) {}
+void str_replace(string *self, const string *find, const string *replacement, int *number_replaced) {}
+void str_replace_using_basic_text(string *self, const char *find, const char *replacement, int *number_replaced) {}
 
 /*
   Grow / add
@@ -86,8 +87,8 @@ void str_pad_right(string *self, char character, size_t count) {}
 /*
   Insert
 */
-void str_insert(string *self, const string *string, int index_of_insertion) {}
-void str_insert_using_basic_text(string *self, const char *using_basic_text, int index_of_insertion) {}
+void str_insert(string *self, const string *insertion, int index_of_insertion) {}
+void str_insert_using_basic_text(string *self, const char *insertion, int index_of_insertion) {}
 
 /*
   Remove / shrink
@@ -96,7 +97,7 @@ void str_delete_from_index_a_to_index_b(string *self, int start_index_a, int end
 void str_delete_first_instance(string *self, const string *text_to_remove) {}
 void str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove) {}
 void str_delete_all_instances(string *self, const string *text_to_remove) {}
-void str_delete_all_instance_using_basic_text(string *self, const char *text_to_remove) {}
+void str_delete_all_instances_using_basic_text(string *self, const char *text_to_remove) {}
 void str_trim_from_end(string *self, char character_to_remove) {}
 void str_trim_from_start(string *self, char character_to_remove) {}
 
