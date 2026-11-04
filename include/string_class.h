@@ -16,6 +16,28 @@ struct string_array;
 typedef struct string string;
 typedef struct string_array string_array;
 
+struct string
+{
+  char *c_string;
+  size_t length;
+};
+
+struct string_array
+{
+  string *string_array;
+  size_t number_of_strings;
+};
+
+typedef enum string_error_code string_error_code;
+
+enum string_error_code
+{
+  NO_ERROR,
+  MALLOC_ERROR,
+  NULL_POINTER_ERROR,
+  EXECUTION_ERROR
+};
+
 // For best practice, use MACROS for RAII
 
 // Define auto clean up macros, users CAN use this but using the
@@ -35,7 +57,7 @@ typedef struct string_array string_array;
 /*
   Must be implemented for auto clean up to work, if you don't this will break
 */
-void str_initialize_string_pointer(string *new, const char *starting_text);
+string_error_code str_initialize_string_pointer(string *new, const char *starting_text);
 /*
   Deconstructors
 */
@@ -99,6 +121,10 @@ void str_destroy_array(string_array **array);
   to report pass / fail? I hate that idiom in C but it's
   really the only way to report success / fail
 
+  TODO: We can over malloc / realloc to keep us having having to
+  realloc every time a string grows. This will involve having to
+  keep track of capacity. This might happen but will be future
+  growth, will have to keep track of how often strings grow.
 */
 
 /*
@@ -108,68 +134,70 @@ void str_clear(string *self);
 
 /*
   Get and Set
+  DO NOT RETURN string_error
 */
 size_t str_get_length(const string *self);
 const char *str_get_c_string(const string *self);
-void str_set_string(string *self, string *string);
-void str_set_string_using_basic_text(string *self, const char *new_text);
-string *str_get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b);
+string_error_code str_set_string(string *self, string *value);
+string_error_code str_set_string_using_basic_text(string *self, const char *new_text);
+string_error_code *str_get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b, string *out);
 
 /*
   Manipulate / modify
 */
-void str_to_upper(string *self);
-void str_to_lower(string *self);
-void str_reverse(string *self);
-void str_replace_first(string *self, const string *find, const string *replacement, bool *replacement_found);
-void str_replace_first_using_basic_text(string *self, const char *find, const char *replacement, bool *replacement_found);
-void str_replace(string *self, const string *find, const string *replacement, int *number_replaced);
-void str_replace_using_basic_text(string *self, const char *find, const char *replacement, int *number_replaced);
+string_error_code str_to_upper(string *self);
+string_error_code str_to_lower(string *self);
+string_error_code str_reverse(string *self);
+string_error_code str_replace_first(string *self, const string *find, const string *replacement, bool *replacement_found);
+string_error_code str_replace_first_using_basic_text(string *self, const char *find, const char *replacement, bool *replacement_found);
+string_error_code str_replace(string *self, const string *find, const string *replacement, int *number_replaced);
+string_error_code str_replace_using_basic_text(string *self, const char *find, const char *replacement, int *number_replaced);
 
 /*
   Grow / add
 */
-void str_append(string *self, const string *more_string);
-void str_append_using_basic_text(string *self, const char *using_basic_text);
-void str_join(string *self, const string_array *strings, const string *separation_characters);
-void str_join_using_basic_text(string *self, const string_array *strings, const char *separation_characters);
-void str_pad_left(string *self, char character, size_t count);
-void str_pad_right(string *self, char character, size_t count);
+string_error_code str_append(string *self, const string *more_string);
+string_error_code str_append_using_basic_text(string *self, const char *using_basic_text);
+string_error_code str_join(string *self, const string_array *strings, const string *separation_characters);
+string_error_code str_join_using_basic_text(string *self, const string_array *strings, const char *separation_characters);
+string_error_code str_pad_left(string *self, char character, size_t count);
+string_error_code str_pad_right(string *self, char character, size_t count);
 
 /*
   Insert
 */
-void str_insert(string *self, const string *insertion, size_t index_of_insertion);
-void str_insert_using_basic_text(string *self, const char *insertion, size_t index_of_insertion);
+string_error_code str_insert(string *self, const string *insertion, size_t index_of_insertion);
+string_error_code str_insert_using_basic_text(string *self, const char *insertion, size_t index_of_insertion);
 
 /*
   Remove / shrink
 */
-void str_delete_from_index_a_to_index_b(string *self, size_t start_index_a, int end_index_b);
-void str_delete_first_instance(string *self, const string *text_to_remove);
-void str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove);
-void str_delete_all_instances(string *self, const string *text_to_remove);
-void str_delete_all_instances_using_basic_text(string *self, const char *text_to_remove);
-void str_trim_from_end(string *self, char character_to_remove);
-void str_trim_from_start(string *self, char character_to_remove);
+string_error_code str_delete_from_index_a_to_index_b(string *self, size_t start_index_a, int end_index_b);
+string_error_code str_delete_first_instance(string *self, const string *text_to_remove);
+string_error_code str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove);
+string_error_code str_delete_all_instances(string *self, const string *text_to_remove);
+string_error_code str_delete_all_instances_using_basic_text(string *self, const char *text_to_remove);
+string_error_code str_trim_from_end(string *self, char character_to_remove);
+string_error_code str_trim_from_start(string *self, char character_to_remove);
 
 /*
   Find
 */
-int str_find_substring(const string *self, const string *sub_string);
-int str_find_substring_using_basic_text(const string *self, const char *using_basic_text);
-int str_find_first_char(const string *self, char c);
-int str_find_last_char(const string *self, char c);
+string_error_code str_find_substring(const string *self, const string *sub_string, size_t *index_out);
+string_error_code str_find_substring_using_basic_text(const string *self, const char *using_basic_text, size_t *index_out);
+string_error_code str_find_first_char(const string *self, char c, size_t *index_out);
+string_error_code str_find_last_char(const string *self, char c);
 
 /*
   Split
 */
 // Returns array of strings
-string_array *str_split(const string *self, const string *splitter);
-string_array *str_split_using_basic_text(const string *self, const char *splitter_text);
+string_error_code *str_split(const string *self, const string *splitter, string_array *out);
+string_error_code *str_split_using_basic_text(const string *self, const char *splitter_text, string_array *out);
 
 /*
   Compare
+  Do not directly return string_error_code, if a failure is detected always returns false
 */
 bool str_is_equal(const string *self, const string *other);
 bool str_is_null_or_whitespace(const string *self);
@@ -184,15 +212,3 @@ bool str_ends_with(const string *self, const string *text_in_question);
 bool str_ends_with_using_basic_text(const string *self, const char *text_in_question);
 bool str_is_upper(const string *self);
 bool str_is_lower(const string *self);
-
-struct string
-{
-  char *c_string;
-  size_t length;
-};
-
-struct string_array
-{
-  string *string_array;
-  size_t number_of_strings;
-};

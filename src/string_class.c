@@ -3,14 +3,14 @@
 /*
   Private helpers
 */
-size_t _get_length_of_basic_string(const char *basic_string)
+size_t priv_get_length_of_basic_string(const char *text)
 {
-  const char *s = basic_string;
-  while (*s != '\0')
+  char *priv_string_tracker_ = text;
+  while (*priv_string_tracker_ != '\0')
   {
-    s++;
+    priv_string_tracker_++;
   }
-  return (s - basic_string);
+  return (size_t)(priv_string_tracker_ - text);
 }
 
 /*
@@ -20,6 +20,7 @@ void clear(string *self) {}
 
 /*
   Get and Set
+  DO NOT RETURN  string_error
 */
 size_t str_get_length(const string *self) {}
 const char *str_get_c_string(const string *self)
@@ -27,13 +28,13 @@ const char *str_get_c_string(const string *self)
   return self->c_string;
 }
 
-void str_set_string(string *self, string *string) {}
+string_error_code str_set_string(string *self, string *value) {}
 
-void str_set_string_using_basic_text(string *self, const char *new_text)
+string_error_code str_set_string_using_basic_text(string *self, const char *new_text)
 {
   if (self)
   {
-    size_t length = _get_length_of_basic_string(new_text);
+    size_t length = priv_get_length_of_basic_string(new_text);
     if (length > self->length)
     {
       if (self->c_string)
@@ -61,60 +62,60 @@ void str_set_string_using_basic_text(string *self, const char *new_text)
     printf("New string is: %s\n", self->c_string);
   }
 }
-string *str_get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b) {}
+string_error_code *str_get_substring_from_index_a_to_index_b(const string *self, int start_index_a, int end_index_b, string *out) {}
 
 /*
   Manipulate / modify
 */
-void str_to_upper(string *self) {}
-void str_to_lower(string *self) {}
-void str_reverse(string *self) {}
-void str_replace_first(string *self, const string *find, const string *replacement, bool *replacement_found) {}
-void str_replace_first_using_basic_text(string *self, const char *find, const char *replacement, bool *replacement_found) {}
-void str_replace(string *self, const string *find, const string *replacement, int *number_replaced) {}
-void str_replace_using_basic_text(string *self, const char *find, const char *replacement, int *number_replaced) {}
+string_error_code str_to_upper(string *self) {}
+string_error_code str_to_lower(string *self) {}
+string_error_code str_reverse(string *self) {}
+string_error_code str_replace_first(string *self, const string *find, const string *replacement, bool *replacement_found) {}
+string_error_code str_replace_first_using_basic_text(string *self, const char *find, const char *replacement, bool *replacement_found) {}
+string_error_code str_replace(string *self, const string *find, const string *replacement, int *number_replaced) {}
+string_error_code str_replace_using_basic_text(string *self, const char *find, const char *replacement, int *number_replaced) {}
 
 /*
   Grow / add
 */
-void str_append(string *self, const string *more_string) {}
-void str_append_using_basic_text(string *self, const char *using_basic_text) {}
-void str_join(string *self, const string_array *strings, const string *separation_characters) {}
-void str_join_using_basic_text(string *self, const string_array *strings, const char *separation_characters) {}
-void str_pad_left(string *self, char character, size_t count) {}
-void str_pad_right(string *self, char character, size_t count) {}
+string_error_code str_append(string *self, const string *more_string) {}
+string_error_code str_append_using_basic_text(string *self, const char *using_basic_text) {}
+string_error_code str_join(string *self, const string_array *strings, const string *separation_characters) {}
+string_error_code str_join_using_basic_text(string *self, const string_array *strings, const char *separation_characters) {}
+string_error_code str_pad_left(string *self, char character, size_t count) {}
+string_error_code str_pad_right(string *self, char character, size_t count) {}
 
 /*
   Insert
 */
-void str_insert(string *self, const string *insertion, size_t index_of_insertion) {}
-void str_insert_using_basic_text(string *self, const char *insertion, size_t index_of_insertion) {}
+string_error_code str_insert(string *self, const string *insertion, size_t index_of_insertion) {}
+string_error_code str_insert_using_basic_text(string *self, const char *insertion, size_t index_of_insertion) {}
 
 /*
   Remove / shrink
 */
-void str_delete_from_index_a_to_index_b(string *self, size_t start_index_a, int end_index_b) {}
-void str_delete_first_instance(string *self, const string *text_to_remove) {}
-void str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove) {}
-void str_delete_all_instances(string *self, const string *text_to_remove) {}
-void str_delete_all_instances_using_basic_text(string *self, const char *text_to_remove) {}
-void str_trim_from_end(string *self, char character_to_remove) {}
-void str_trim_from_start(string *self, char character_to_remove) {}
+string_error_code str_delete_from_index_a_to_index_b(string *self, size_t start_index_a, int end_index_b) {}
+string_error_code str_delete_first_instance(string *self, const string *text_to_remove) {}
+string_error_code str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove) {}
+string_error_code str_delete_all_instances(string *self, const string *text_to_remove) {}
+string_error_code str_delete_all_instances_using_basic_text(string *self, const char *text_to_remove) {}
+string_error_code str_trim_from_end(string *self, char character_to_remove) {}
+string_error_code str_trim_from_start(string *self, char character_to_remove) {}
 
 /*
   Find
 */
-int str_find_substring(const string *self, const string *sub_string) {}
-int str_find_substring_using_basic_text(const string *self, const char *using_basic_text) {}
-int str_find_first_char(const string *self, char c) {}
-int str_find_last_char(const string *self, char c) {}
+string_error_code str_find_substring(const string *self, const string *sub_string, size_t *index_out) {}
+string_error_code str_find_substring_using_basic_text(const string *self, const char *using_basic_text, size_t *index_out) {}
+string_error_code str_find_first_char(const string *self, char c, size_t *index_out) {}
+string_error_code str_find_last_char(const string *self, char c) {}
 
 /*
   Split
 */
 // Returns array of strings
-string_array *str_split(const string *self, const string *str_split) {}
-string_array *str_split_using_basic_text(const string *self, const char *splitter_text)
+string_error_code *str_split(const string *self, const string *str_split, string_array *out) {}
+string_error_code *str_split_using_basic_text(const string *self, const char *splitter_text, string_array *out)
 {
   // const char *string_to_split = *self->c_string;
   // // Sliding window
@@ -141,6 +142,7 @@ string_array *str_split_using_basic_text(const string *self, const char *splitte
 
 /*
   Compare
+  Do not return string_error_code, if a failure is detected will always return false
 */
 bool str_is_equal(const string *self, const string *other) {}
 bool str_is_null_or_whitespace(const string *self) {}
@@ -159,15 +161,15 @@ bool str_is_lower(const string *self) {}
 /*
   Required functions
 */
-void initialize_string_pointer(string *new, const char *starting_text)
+string_error_code str_initialize_string_pointer(string *new, const char *starting_text)
 {
-  size_t starting_text_size = _get_length_of_basic_string(starting_text);
+  size_t starting_text_size = priv_get_length_of_basic_string(starting_text);
   // This looks a lot like our set_string_using_basic_text
   // with the catch that we are untrusting of the new data
   // maybe we reuse
   if (new)
   {
-    size_t current_pointer_string_size = _get_length_of_basic_string(new->c_string);
+    size_t current_pointer_string_size = priv_get_length_of_basic_string(new->c_string);
 
     // if for some reason the supposed new ptr has a valid ptr
     if (new->c_string &&
@@ -196,10 +198,15 @@ void initialize_string_pointer(string *new, const char *starting_text)
     if (NULL == new)
     {
       printf("Failed to get memory");
-      return;
+      return MALLOC_ERROR;
     }
-    initialize_string_pointer(new, starting_text);
+    string_error_code error = str_initialize_string_pointer(new, starting_text);
+    if (error)
+    {
+      return error;
+    }
   }
+  return NO_ERROR;
 }
 
 /*
