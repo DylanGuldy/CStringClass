@@ -87,13 +87,13 @@ void str_pad_right(string *self, char character, size_t count) {}
 /*
   Insert
 */
-void str_insert(string *self, const string *insertion, int index_of_insertion) {}
-void str_insert_using_basic_text(string *self, const char *insertion, int index_of_insertion) {}
+void str_insert(string *self, const string *insertion, size_t index_of_insertion) {}
+void str_insert_using_basic_text(string *self, const char *insertion, size_t index_of_insertion) {}
 
 /*
   Remove / shrink
 */
-void str_delete_from_index_a_to_index_b(string *self, int start_index_a, int end_index_b) {}
+void str_delete_from_index_a_to_index_b(string *self, size_t start_index_a, int end_index_b) {}
 void str_delete_first_instance(string *self, const string *text_to_remove) {}
 void str_delete_first_instance_using_basic_text(string *self, const char *text_to_remove) {}
 void str_delete_all_instances(string *self, const string *text_to_remove) {}
