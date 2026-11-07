@@ -1,6 +1,7 @@
 # Basic Flags
 CC = gcc
-CFLAGS = -Wall -std=c11 -g
+# @todo readd -Wall
+CFLAGS = -std=c11 -g
 INCLUDE_FLAGS = -I
 INCLUDE = include/
 SRC = src

@@ -18,10 +18,14 @@ typedef struct string_array string_array;
 
 struct string
 {
+  // Still a null terminated string
   char *c_string;
   size_t length;
 };
 
+// There SHALL always be a NULL string with length 0 at the
+// end of string_array for safety this should not be
+// calculated as part of number_of_strings
 struct string_array
 {
   string *string_array;
@@ -192,14 +196,15 @@ string_error_code str_find_last_char(const string *self, char c);
   Split
 */
 // Returns array of strings
-string_error_code *str_split(const string *self, const string *splitter, string_array *out);
-string_error_code *str_split_using_basic_text(const string *self, const char *splitter_text, string_array *out);
+string_error_code str_split(const string *self, const string *splitter, string_array *out);
+string_error_code str_split_using_basic_text(const string *self, const char *splitter_text, string_array *out);
 
 /*
   Compare
   Do not directly return string_error_code, if a failure is detected always returns false
 */
 bool str_is_equal(const string *self, const string *other);
+bool str_is_equal_to_basic_text(const string *self, const char *text_in_question);
 bool str_is_null_or_whitespace(const string *self);
 bool str_is_alpha(const string *self);
 bool str_is_numeric(const string *self);

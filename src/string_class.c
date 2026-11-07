@@ -1,11 +1,17 @@
 #include "string_class.h"
 
+#define RETURN_IF_BAD_MALLOC(new_pointer) \
+  if (!new_pointer)                       \
+  {                                       \
+    return MALLOC_ERROR;                  \
+  }
+
 /*
   Private helpers
 */
 size_t priv_get_length_of_basic_string(const char *text)
 {
-  char *priv_string_tracker_ = text;
+  const char *priv_string_tracker_ = text;
   while (*priv_string_tracker_ != '\0')
   {
     priv_string_tracker_++;
@@ -114,37 +120,89 @@ string_error_code str_find_last_char(const string *self, char c) {}
   Split
 */
 // Returns array of strings
-string_error_code *str_split(const string *self, const string *str_split, string_array *out) {}
-string_error_code *str_split_using_basic_text(const string *self, const char *splitter_text, string_array *out)
+string_error_code str_split(const string *self, const string *str_split, string_array *out) {}
+string_error_code str_split_using_basic_text(const string *self, const char *splitter_text, string_array *out)
 {
-  // const char *string_to_split = *self->c_string;
-  // // Sliding window
-  // char *main_string_tracker = string_to_split;
-  // char *splitter_tracker = splitter_text;
+  if (!self || !out)
+  {
+    return NULL_POINTER_ERROR;
+  }
+  // Clear out ay old data
+  // This may become a private function
+  if (out->string_array)
+  {
+    // The last c_string in the array is null and length is 0
+    for (int ix = 0; ix < out->number_of_strings; ix++)
+    {
+      if (out->string_array[ix].c_string)
+      {
+        free(out->string_array[ix].c_string);
+      }
+      free(out->string_array[ix].c_string);
+      out->number_of_strings = 0;
+    }
+    free(out->string_array);
+  }
+  char *split_indexes[100] = {0};
+  size_t new_string_count = 0;
 
-  // size_t splitter_size = _get_length_of_basic_string(splitter_text);
+  size_t splitter_size = priv_get_length_of_basic_string(splitter_text);
 
-  // // We could also stop once the length of the remaining characters is less than
-  // // the str_split text but I think the cycles to calculate that and time saved is
-  // // not any greater than just iterating through
-  // for (*main_string_tracker; *main_string_tracker != '\0'; main_string_tracker++)
-  // {
-  //   size_t same_character_count = 0;
-  //   while (*main_string_tracker == *splitter_tracker)
-  //   {
-  //     same_character_count++;
-  //     if (same_character_count == splitter_size)
-  //     {
-  //     }
-  //   }
-  // }
+  // We could also stop once the length of the remaining characters is less than
+  // the str_split text but I think the cycles to calculate that and time saved is
+  // not any greater than just iterating through
+  for (char *main_string_tracker = self->c_string; *main_string_tracker != '\0'; main_string_tracker++)
+  {
+    size_t same_character_count = 0;
+
+    // Loop through and see if the whole pattern is here
+    if (memcmp(main_string_tracker, splitter_text, splitter_size) == 0)
+    {
+      // Save the location of the start of the match
+      split_indexes[new_string_count] = main_string_tracker;
+      // Increment for next save, and to keep track of how many matches
+      new_string_count++;
+      // Fast forward pointer to end of match
+      main_string_tracker += splitter_size;
+    }
+  }
+
+  size_t number_of_result_strings = new_string_count;
+  bool ends_with_split = false;
+  if (str_ends_with_using_basic_text(self, splitter_text))
+  {
+    // It ends with a split
+    number_of_result_strings--;
+    ends_with_split = true;
+  }
+  // +1 for the null terminate at the end of the array
+  string *result_string_array = malloc(sizeof(string) * (number_of_result_strings + 1));
+  RETURN_IF_BAD_MALLOC(result_string_array)
+  memset(result_string_array, 0x00, sizeof(string) * (number_of_result_strings + 1));
+
+  for (int ix = 0; ix < number_of_result_strings; ix++)
+  {
+    result_string_array[ix].c_string = malloc(sizeof(splitter_size + 1));
+    RETURN_IF_BAD_MALLOC(result_string_array[ix].c_string)
+
+    result_string_array[ix].length = splitter_size;
+  }
+
+  out->string_array[out->number_of_strings + new_string_count];
 }
 
 /*
   Compare
   Do not return string_error_code, if a failure is detected will always return false
 */
-bool str_is_equal(const string *self, const string *other) {}
+bool str_is_equal(const string *self, const string *other)
+{
+  return str_is_equal_to_basic_text(self, other->c_string);
+}
+bool str_is_equal_to_basic_text(const string *self, const char *text_in_question)
+{
+  return memcmp(self->c_string, text_in_question, self->length) == 0;
+}
 bool str_is_null_or_whitespace(const string *self) {}
 bool str_is_alpha(const string *self) {}
 bool str_is_numeric(const string *self) {}
@@ -153,8 +211,23 @@ bool str_contains(const string *self, const string *text_in_question) {}
 bool str_contains_using_basic_text(const string *self, const char *text_in_question) {}
 bool str_starts_with(const string *self, const string *text_in_question) {}
 bool str_starts_with_using_basic_text(const string *self, const char *text_in_question) {}
-bool str_ends_with(const string *self, const string *text_in_question) {}
-bool str_ends_with_using_basic_text(const string *self, const char *text_in_question) {}
+bool str_ends_with(const string *self, const string *text_in_question)
+{
+  return str_ends_with_using_basic_text(self, text_in_question->c_string);
+}
+bool str_ends_with_using_basic_text(const string *self, const char *text_in_question)
+{
+  size_t text_size = priv_get_length_of_basic_string(text_in_question);
+  if (text_size > self->length)
+  {
+    return false;
+  }
+  char *end_of_text = self->c_string;
+  end_of_text += self->length;
+  // back up the correct amount for mem compare
+  end_of_text -= text_size;
+  return (memcmp(end_of_text, text_in_question, text_size) == 0);
+}
 bool str_is_upper(const string *self) {}
 bool str_is_lower(const string *self) {}
 
@@ -195,11 +268,7 @@ string_error_code str_initialize_string_pointer(string *new, const char *startin
     // Yeah we could recall this with the now initalized ptr
     // but that feels disingenuous
     new = malloc(sizeof(string));
-    if (NULL == new)
-    {
-      printf("Failed to get memory");
-      return MALLOC_ERROR;
-    }
+    RETURN_IF_BAD_MALLOC(new)
     string_error_code error = str_initialize_string_pointer(new, starting_text);
     if (error)
     {
@@ -217,11 +286,11 @@ void str_destroy(string *self)
   printf("I'm killing!\n");
   if (self)
   {
-    if (NULL != (self)->c_string)
+    if (NULL != self->c_string)
     {
-      free((self)->c_string);
+      free(self->c_string);
     }
-    (self)->length = 0;
+    self->length = 0;
   }
 }
 
@@ -230,12 +299,12 @@ void str_destroy_ptr(string **self)
   printf("DEBUG: I'M KILLING AGAIN.\n");
   if (self && *self)
   {
-    if (NULL != (*self)->c_string)
+    if ((*self)->c_string)
     {
       free((*self)->c_string);
     }
     (*self)->length = 0;
-    free(self);
+    free(*self);
   }
 }
 
@@ -246,10 +315,12 @@ void str_destroy_array(string_array **array)
     for (int ix = 0; ix < (*array)->number_of_strings; ix++)
     {
       string *string = &(*array)->string_array[ix];
-      if (string)
+      if ((*array)->string_array[ix].c_string)
       {
-        str_destroy_ptr(&string);
+        free((*array)->string_array[ix].c_string);
+        (*array)->string_array[ix].length = 0;
       }
     }
+    free(*array);
   }
 }

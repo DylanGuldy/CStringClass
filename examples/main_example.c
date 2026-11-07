@@ -19,6 +19,16 @@ int main()
   //{
   //   printf(split_string->string_array[ix].data.c_string);
   // }
+  printf("****************************\n");
+  printf("**    ends with test      **\n");
+  printf("****************************\n");
+
+  NEW_STRING(ends_with_test, "This string ends with hello");
+  printf("Ends with test string: %s\n", ends_with_test.c_string);
+  if (str_ends_with_using_basic_text(&ends_with_test, "hello"))
+  {
+    printf("YAY\n");
+  }
 
   return 0;
 }
