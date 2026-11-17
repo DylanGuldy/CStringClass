@@ -14,11 +14,12 @@ int main()
   printf("%s\n", str_get_c_string(&test_new));
   // Test str_split
   int number_of_new_strings;
-  // auto_string_array split_string = str_split_using_basic_text(&fill_out_later, " ", &number_of_new_strings);
-  // for (int ix = 0; ix < number_of_new_strings; ix++)
-  //{
-  //   printf(split_string->string_array[ix].data.c_string);
-  // }
+  auto_string_array split_string;
+  str_split_using_basic_text(&fill_out_later, " ", &split_string);
+  for (int ix = 0; ix < split_string.number_of_strings; ix++)
+  {
+    printf("%s\n", split_string.string_array[ix].c_string);
+  }
   printf("****************************\n");
   printf("**    ends with test      **\n");
   printf("****************************\n");

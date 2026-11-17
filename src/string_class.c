@@ -129,20 +129,21 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
   }
   // Clear out ay old data
   // This may become a private function
-  if (out->string_array)
-  {
-    // The last c_string in the array is null and length is 0
-    for (int ix = 0; ix < out->number_of_strings; ix++)
-    {
-      if (out->string_array[ix].c_string)
-      {
-        free(out->string_array[ix].c_string);
-      }
-      free(out->string_array[ix].c_string);
-      out->number_of_strings = 0;
-    }
-    free(out->string_array);
-  }
+  // if (NULL != out->string_array)
+  // {
+  //   printf("DEBUG: Freeing\n");
+  //   // The last c_string in the array is null and length is 0
+  //   for (int ix = 0; ix < out->number_of_strings; ix++)
+  //   {
+  //     if (out->string_array[ix].c_string)
+  //     {
+  //       free(out->string_array[ix].c_string);
+  //     }
+  //     out->number_of_strings = 0;
+  //   }
+  //   printf("DEBUG: Freeing string array now\n");
+  //   free(out->string_array);
+  // }
   char *split_indexes[100] = {0};
   size_t new_string_count = 0;
 
@@ -180,15 +181,19 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
   RETURN_IF_BAD_MALLOC(result_string_array)
   memset(result_string_array, 0x00, sizeof(string) * (number_of_result_strings + 1));
 
+  char *start_split_string_index = self->c_string;
   for (int ix = 0; ix < number_of_result_strings; ix++)
   {
-    result_string_array[ix].c_string = malloc(sizeof(splitter_size + 1));
+    size_t size_of_string = split_indexes[ix] - start_split_string_index;
+    start_split_string_index = split_indexes[ix] + splitter_size;
+    result_string_array[ix].c_string = malloc(sizeof(size_of_string + 1));
     RETURN_IF_BAD_MALLOC(result_string_array[ix].c_string)
-
-    result_string_array[ix].length = splitter_size;
+    result_string_array[ix].length = size_of_string;
   }
 
-  out->string_array[out->number_of_strings + new_string_count];
+  out->string_array = result_string_array;
+  out->number_of_strings = number_of_result_strings;
+  return NO_ERROR;
 }
 
 /*
@@ -308,19 +313,18 @@ void str_destroy_ptr(string **self)
   }
 }
 
-void str_destroy_array(string_array **array)
+void str_destroy_array(string_array *array)
 {
-  if (array && *array)
+  if (array)
   {
-    for (int ix = 0; ix < (*array)->number_of_strings; ix++)
+    for (int ix = 0; ix < array->number_of_strings; ix++)
     {
-      string *string = &(*array)->string_array[ix];
-      if ((*array)->string_array[ix].c_string)
+      string *string = &((array)->string_array[ix]);
+      if ((array)->string_array[ix].c_string)
       {
-        free((*array)->string_array[ix].c_string);
-        (*array)->string_array[ix].length = 0;
+        free((array)->string_array[ix].c_string);
+        (array)->string_array[ix].length = 0;
       }
     }
-    free(*array);
   }
 }

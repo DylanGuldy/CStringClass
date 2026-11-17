@@ -56,7 +56,7 @@ enum string_error_code
 // NOTE: string_array construction is still manual
 #define auto_string priv_auto_cleanup_string_ string
 #define auto_string_ptr priv_auto_cleanup_string_ptr_ string *
-#define auto_string_array priv_auto_cleanup_string_array_ string_array *
+#define auto_string_array priv_auto_cleanup_string_array_ string_array
 
 /*
   Must be implemented for auto clean up to work, if you don't this will break
@@ -67,7 +67,7 @@ string_error_code str_initialize_string_pointer(string *new, const char *startin
 */
 void str_destroy(string *self);
 void str_destroy_ptr(string **self);
-void str_destroy_array(string_array **array);
+void str_destroy_array(string_array *array);
 
 /*
   Helper, can ignore
