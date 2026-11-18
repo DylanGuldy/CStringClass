@@ -163,32 +163,52 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
       split_indexes[new_string_count] = main_string_tracker;
       // Increment for next save, and to keep track of how many matches
       new_string_count++;
-      // Fast forward pointer to end of match
-      main_string_tracker += splitter_size;
+      // Fast forward pointer to end of match, account for the +1 about
+      // to happen at the top
+      main_string_tracker += (splitter_size - 1);
     }
   }
 
   size_t number_of_result_strings = new_string_count;
-  bool ends_with_split = false;
-  if (str_ends_with_using_basic_text(self, splitter_text))
+
+  bool ends_with_split = str_ends_with_using_basic_text(self, splitter_text);
+
+  string *result_string_array;
+  if (!ends_with_split)
   {
-    // It ends with a split
-    number_of_result_strings--;
-    ends_with_split = true;
+    // +1 for the characters after the last split, +1 for the null terminate at the end of the array
+    number_of_result_strings = number_of_result_strings + 2;
   }
-  // +1 for the null terminate at the end of the array
-  string *result_string_array = malloc(sizeof(string) * (number_of_result_strings + 1));
+  else
+  {
+    // +1 for the null terminate at the end of the array
+    number_of_result_strings = number_of_result_strings + 1;
+  }
+  result_string_array = malloc(sizeof(string) * (number_of_result_strings));
   RETURN_IF_BAD_MALLOC(result_string_array)
-  memset(result_string_array, 0x00, sizeof(string) * (number_of_result_strings + 1));
+  memset(result_string_array, 0x00, sizeof(string) * (number_of_result_strings));
 
   char *start_split_string_index = self->c_string;
-  for (int ix = 0; ix < number_of_result_strings; ix++)
+  for (int ix = 0; ix < new_string_count; ix++)
   {
     size_t size_of_string = split_indexes[ix] - start_split_string_index;
-    start_split_string_index = split_indexes[ix] + splitter_size;
     result_string_array[ix].c_string = malloc(sizeof(size_of_string + 1));
     RETURN_IF_BAD_MALLOC(result_string_array[ix].c_string)
     result_string_array[ix].length = size_of_string;
+    memset(result_string_array[ix].c_string, 0x00, size_of_string);
+    memcpy(result_string_array[ix].c_string, start_split_string_index, size_of_string);
+    start_split_string_index = split_indexes[ix] + splitter_size;
+  }
+
+  if (!ends_with_split)
+  {
+    char *last_character_in_string = self->c_string + self->length;
+    size_t last_string_length = last_character_in_string - start_split_string_index;
+    result_string_array[number_of_result_strings + 1].c_string = malloc(last_string_length + 1);
+    RETURN_IF_BAD_MALLOC(result_string_array[number_of_result_strings + 1].c_string);
+    result_string_array[number_of_result_strings + 1].length = last_string_length;
+    memset(result_string_array[number_of_result_strings + 1].c_string, 0x00, last_string_length);
+    memcpy(result_string_array[number_of_result_strings + 1].c_string, start_split_string_index, last_string_length);
   }
 
   out->string_array = result_string_array;
