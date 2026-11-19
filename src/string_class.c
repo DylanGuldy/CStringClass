@@ -200,19 +200,20 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
     start_split_string_index = split_indexes[ix] + splitter_size;
   }
 
+  // If it ends with a split we dont care
   if (!ends_with_split)
   {
     char *last_character_in_string = self->c_string + self->length;
     size_t last_string_length = last_character_in_string - start_split_string_index;
-    result_string_array[number_of_result_strings + 1].c_string = malloc(last_string_length + 1);
-    RETURN_IF_BAD_MALLOC(result_string_array[number_of_result_strings + 1].c_string);
-    result_string_array[number_of_result_strings + 1].length = last_string_length;
-    memset(result_string_array[number_of_result_strings + 1].c_string, 0x00, last_string_length);
-    memcpy(result_string_array[number_of_result_strings + 1].c_string, start_split_string_index, last_string_length);
+    result_string_array[new_string_count].c_string = malloc(last_string_length + 1);
+    RETURN_IF_BAD_MALLOC(result_string_array[new_string_count].c_string);
+    result_string_array[new_string_count].length = last_string_length;
+    memset(result_string_array[new_string_count].c_string, 0x00, last_string_length);
+    memcpy(result_string_array[new_string_count].c_string, start_split_string_index, last_string_length);
   }
 
   out->string_array = result_string_array;
-  out->number_of_strings = number_of_result_strings;
+  out->number_of_strings = number_of_result_strings - 1;
   return NO_ERROR;
 }
 

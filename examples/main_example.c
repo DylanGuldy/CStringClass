@@ -15,10 +15,19 @@ int main()
   // Test str_split
   int number_of_new_strings;
   auto_string_array split_string;
+  // Split string basic
   str_split_using_basic_text(&fill_out_later, " ", &split_string);
   for (int ix = 0; ix < split_string.number_of_strings; ix++)
   {
     printf("%s\n", split_string.string_array[ix].c_string);
+  }
+  // Split string harder
+  NEW_STRING(splitter_test, "ThisawkIsawkAawkSplitterawkTestawk");
+  auto_string_array split_string_two;
+  str_split_using_basic_text(&splitter_test, "awk", &split_string_two);
+  for (int ix = 0; ix < split_string_two.number_of_strings; ix++)
+  {
+    printf("%s\n", split_string_two.string_array[ix].c_string);
   }
   printf("****************************\n");
   printf("**    ends with test      **\n");
