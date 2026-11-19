@@ -54,7 +54,8 @@ enum string_error_code
 // ONLY if you are okay with manually creating your string.
 // For inital creation it's suggested to use the MACROS
 // defined below
-// NOTE: string_array construction is still manual
+// NOTE: string_array construction is dangerous if you don't
+//  initialize to nulls i.e. {0}
 #define auto_string priv_auto_cleanup_string_ string
 #define auto_string_ptr priv_auto_cleanup_string_ptr_ string *
 #define auto_string_array priv_auto_cleanup_string_array_ string_array
@@ -194,7 +195,7 @@ string_error_code str_trim_from_start(string *self, char character_to_remove);
 string_error_code str_find_substring(const string *self, const string *sub_string, size_t *index_out);
 string_error_code str_find_substring_using_basic_text(const string *self, const char *using_basic_text, size_t *index_out);
 string_error_code str_find_first_char(const string *self, char c, size_t *index_out);
-string_error_code str_find_last_char(const string *self, char c);
+string_error_code str_find_last_char(const string *self, char c, size_t *index_out);
 
 /*
   Split

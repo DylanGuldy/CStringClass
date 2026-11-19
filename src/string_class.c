@@ -114,15 +114,39 @@ string_error_code str_trim_from_start(string *self, char character_to_remove) {}
 string_error_code str_find_substring(const string *self, const string *sub_string, size_t *index_out) {}
 string_error_code str_find_substring_using_basic_text(const string *self, const char *using_basic_text, size_t *index_out) {}
 string_error_code str_find_first_char(const string *self, char c, size_t *index_out) {}
-string_error_code str_find_last_char(const string *self, char c) {}
+string_error_code str_find_last_char(const string *self, char c, size_t *index_out)
+{
+  char *backwards_tracker = self->c_string + self->length;
+  size_t index = self->length;
+  while (backwards_tracker != self->c_string && *backwards_tracker != c)
+  {
+    backwards_tracker--;
+  }
+  if (backwards_tracker == self->c_string && *backwards_tracker != c)
+  {
+    // index not found
+    *index_out = self->length + 1;
+  }
+  else
+  {
+    *index_out = backwards_tracker - self->c_string;
+  }
+  return NO_ERROR;
+}
 
 /*
   Split
 */
 // Returns array of strings
-string_error_code str_split(const string *self, const string *str_split, string_array *out) {}
+string_error_code str_split(const string *self, const string *str_split, string_array *out)
+{
+  return str_split_using_basic_text(self, str_split->c_string, out);
+}
+
 string_error_code str_split_using_basic_text(const string *self, const char *splitter_text, string_array *out)
 {
+  // @todo We may want to think about cleaning / refactoring
+  //  once str_find_substring is done
   if (!self || !out)
   {
     return NULL_POINTER_ERROR;
@@ -141,8 +165,6 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
   // not any greater than just iterating through
   for (char *main_string_tracker = self->c_string; *main_string_tracker != '\0'; main_string_tracker++)
   {
-    size_t same_character_count = 0;
-
     // Loop through and see if the whole pattern is here
     if (memcmp(main_string_tracker, splitter_text, splitter_size) == 0)
     {
@@ -321,8 +343,9 @@ void str_destroy_ptr(string **self)
   }
 }
 
-// WARNING, if you created a string_array and did not init everything to null
-// This CAN cause seg faults. Especially if you created on the stack
+// WARNING, if you created a string_array and did not
+// init everything to null this CAN and probably WILL
+// cause seg faults. Especially if you created on the stack
 void str_destroy_array(string_array *array)
 {
   if (array)
