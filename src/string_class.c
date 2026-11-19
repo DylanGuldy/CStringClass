@@ -347,5 +347,6 @@ void str_destroy_array(string_array *array)
         (array)->string_array[ix].length = 0;
       }
     }
+    free(array->string_array);
   }
 }

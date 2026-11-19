@@ -46,9 +46,8 @@ $(LIB): $(LIB_OBJS)
 	$(AR) rcs $@ $^
 
 $(EXAMPLE): $(EXAMPLE_DIR)/main_example.c $(LIB)
-	$(CC) $(CFLAGS) $< $(INCLUDE_FLAGS) $(INCLUDE) $(LDFLAGS) $(LDLIBS)	
-# $(CC) $(CFLAGS) $< $(INCLUDE_FLAGS) $(INCLUDE) $(LDFLAGS) $(LDLIBS) -o $@
-
+	$(CC) $(CFLAGS) $< $(INCLUDE_FLAGS) $(INCLUDE) $(LDFLAGS) $(LDLIBS) -o $@
+#	$(CC) $(CFLAGS) $< $(INCLUDE_FLAGS) $(INCLUDE) $(LDFLAGS) $(LDLIBS)	
 
 
 
