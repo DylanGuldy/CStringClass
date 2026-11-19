@@ -23,9 +23,10 @@ struct string
   size_t length;
 };
 
-// There SHALL always be a NULL string with length 0 at the
-// end of string_array for safety this should not be
-// calculated as part of number_of_strings
+// After initialization there SHALL always be a NULL
+// string with length 0 at the end of string_array
+// for safety this should not be calculated as part
+// of number_of_strings
 struct string_array
 {
   string *string_array;
@@ -89,6 +90,9 @@ void str_destroy_array(string_array *array);
       {                                        \
           .c_string = NULL,                    \
           .length = 0};
+
+#define NEW_EMPTY_STRING_ARRAY(string_array_variable_name) \
+  auto_string_array string_array_variable_name = {0};
 
 #define NEW_STRING(string_variable_name, initial_value)                                  \
   NEW_EMPTY_STRING(string_variable_name)                                                 \

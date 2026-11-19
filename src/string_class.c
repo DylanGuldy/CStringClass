@@ -127,23 +127,10 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
   {
     return NULL_POINTER_ERROR;
   }
-  // Clear out ay old data
-  // This may become a private function
-  // if (NULL != out->string_array)
-  // {
-  //   printf("DEBUG: Freeing\n");
-  //   // The last c_string in the array is null and length is 0
-  //   for (int ix = 0; ix < out->number_of_strings; ix++)
-  //   {
-  //     if (out->string_array[ix].c_string)
-  //     {
-  //       free(out->string_array[ix].c_string);
-  //     }
-  //     out->number_of_strings = 0;
-  //   }
-  //   printf("DEBUG: Freeing string array now\n");
-  //   free(out->string_array);
-  // }
+
+  // Clean out any old data
+  str_destroy_array(out);
+
   char *split_indexes[100] = {0};
   size_t new_string_count = 0;
 
@@ -192,11 +179,11 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
   for (int ix = 0; ix < new_string_count; ix++)
   {
     size_t size_of_string = split_indexes[ix] - start_split_string_index;
-    result_string_array[ix].c_string = malloc(sizeof(size_of_string + 1));
+    result_string_array[ix].c_string = malloc(sizeof(char) * (size_of_string + 1));
     RETURN_IF_BAD_MALLOC(result_string_array[ix].c_string)
     result_string_array[ix].length = size_of_string;
-    memset(result_string_array[ix].c_string, 0x00, size_of_string);
-    memcpy(result_string_array[ix].c_string, start_split_string_index, size_of_string);
+    memset(result_string_array[ix].c_string, 0x00, sizeof(char) * (size_of_string + 1));
+    memcpy(result_string_array[ix].c_string, start_split_string_index, sizeof(char) * size_of_string);
     start_split_string_index = split_indexes[ix] + splitter_size;
   }
 
@@ -205,11 +192,11 @@ string_error_code str_split_using_basic_text(const string *self, const char *spl
   {
     char *last_character_in_string = self->c_string + self->length;
     size_t last_string_length = last_character_in_string - start_split_string_index;
-    result_string_array[new_string_count].c_string = malloc(last_string_length + 1);
+    result_string_array[new_string_count].c_string = malloc(sizeof(char) * (last_string_length + 1));
     RETURN_IF_BAD_MALLOC(result_string_array[new_string_count].c_string);
     result_string_array[new_string_count].length = last_string_length;
-    memset(result_string_array[new_string_count].c_string, 0x00, last_string_length);
-    memcpy(result_string_array[new_string_count].c_string, start_split_string_index, last_string_length);
+    memset(result_string_array[new_string_count].c_string, 0x00, sizeof(char) * (last_string_length + 1));
+    memcpy(result_string_array[new_string_count].c_string, start_split_string_index, sizeof(char) * last_string_length);
   }
 
   out->string_array = result_string_array;
@@ -334,19 +321,24 @@ void str_destroy_ptr(string **self)
   }
 }
 
+// WARNING, if you created a string_array and did not init everything to null
+// This CAN cause seg faults. Especially if you created on the stack
 void str_destroy_array(string_array *array)
 {
   if (array)
   {
-    for (int ix = 0; ix < array->number_of_strings; ix++)
+    if (array->string_array)
     {
-      string *string = &((array)->string_array[ix]);
-      if ((array)->string_array[ix].c_string)
+      for (int ix = 0; ix < array->number_of_strings; ix++)
       {
-        free((array)->string_array[ix].c_string);
-        (array)->string_array[ix].length = 0;
+        if (array->string_array[ix].c_string)
+        {
+          free(array->string_array[ix].c_string);
+          array->string_array[ix].length = 0;
+        }
       }
+      free(array->string_array);
     }
-    free(array->string_array);
+    array->number_of_strings = 0;
   }
 }

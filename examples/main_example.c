@@ -14,7 +14,7 @@ int main()
   printf("%s\n", str_get_c_string(&test_new));
   // Test str_split
   int number_of_new_strings;
-  auto_string_array split_string;
+  NEW_EMPTY_STRING_ARRAY(split_string);
   // Split string basic
   str_split_using_basic_text(&fill_out_later, " ", &split_string);
   for (int ix = 0; ix < split_string.number_of_strings; ix++)
@@ -23,7 +23,7 @@ int main()
   }
   // Split string harder
   NEW_STRING(splitter_test, "ThisawkIsawkAawkSplitterawkTestawk");
-  auto_string_array split_string_two;
+  auto_string_array split_string_two = {0};
   str_split_using_basic_text(&splitter_test, "awk", &split_string_two);
   for (int ix = 0; ix < split_string_two.number_of_strings; ix++)
   {
